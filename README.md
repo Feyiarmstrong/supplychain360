@@ -1,7 +1,7 @@
 # CustomizeSupplyChain360 — Production-Grade Unified Supply Chain Data Platform
 
 ## Overview
-SupplyChain360 is a production-grade unified supply chain data platform that integrates multiple heterogeneous data sources into a single, reliable, and scalable data warehouse. The platform automates the entire data lifecycle — from raw ingestion to analytics-ready models — using modern data engineering tools and cloud infrastructure.
+SupplyChain360 is a production-grade unified supply chain data platform that integrates multiple heterogeneous data sources into a single, reliable and scalable data warehouse. The platform automates the entire data lifecycle from raw ingestion to analytics-ready models using modern data engineering tools and cloud infrastructure.
 
 
 ## Tech Stack
@@ -22,77 +22,41 @@ SupplyChain360 is a production-grade unified supply chain data platform that int
 ## Project Structure
 
 supplychain360/
-
 ├── .github/
-
 │   └── workflows/
-
 │       └── ci_cd.yml               # GitHub Actions CI/CD pipeline
-
 ├── airflow/
-
 │   ├── Dockerfile                  # Custom Airflow image
-
 │   ├── docker-compose.yml          # Airflow services
-
 │   ├── requirements.txt            # Python dependencies
-
 │   └── dags/
-
 │       └── supplychain360_dag.py   # Main pipeline DAG
-
 ├── configs/                        # GCP credentials (gitignored)
-
 ├── dbt/
-
 │   └── supplychain360_dbt/
-
 │       ├── models/
-
 │       │   ├── staging/            # 7 staging models
-
 │       │   └── analytics/          # 4 dims + 3 fact models
-
 │       └── dbt_project.yml
-
 ├── docker/
-
 │   ├── Dockerfile.ingestion        # Ingestion container
-
 │   └── requirements.txt
-
 ├── ingestion/
-
 │   ├── main.py                     # Orchestrates all ingesters
-
 │   ├── s3_ingester.py              # AWS S3 ingestion
-
 │   ├── postgres_ingester.py        # PostgreSQL ingestion
-
 │   ├── gsheets_ingester.py         # Google Sheets ingestion
-
 │   ├── writer.py                   # Parquet writer to S3
-
 │   └── utils.py                    # Shared utilities
-
 ├── terraform/
-
 │   ├── main.tf                     # Provider + remote state
-
 │   ├── variables.tf                # Variables
-
 │   ├── s3.tf                       # S3 buckets
-
 │   ├── dynamodb.tf                 # State locking
-
 │   └── outputs.tf                  # Output values
-
 ├── .env.example                    # Environment variables template
-
 ├── .gitignore
-
 ├── docker-compose.yml              # Root compose for ingestion
-
 └── requirements.txt
 
 ---
@@ -151,12 +115,12 @@ Resources provisioned in AWS:
 
 Every push to main automatically:
 
-1. ✅ Sets up Python environment
-2. ✅ Installs dbt
-3. ✅ Creates dbt profiles from GitHub secrets
-4. ✅ Runs dbt tests against Snowflake
-5. ✅ Logs into Docker Hub
-6. ✅ Builds and pushes Docker image with two tags:
+1.  Sets up Python environment
+2.  Installs dbt
+3.  Creates dbt profiles from GitHub secrets
+4.  Runs dbt tests against Snowflake
+5.  Logs into Docker Hub
+6.  Builds and pushes Docker image with two tags:
    - feyiarmstrong/supplychain360-ingestion:latest
    - feyiarmstrong/supplychain360-ingestion:<commit-sha>
 
@@ -182,27 +146,35 @@ Copy .env.example to .env and fill in your values:
 ### Run Ingestion Locally
 
 cd ingestion
+
 python main.py
 
 ### Run With Docker
 
 docker compose build
+
 docker compose run ingestion
 
 ### Run dbt Models
 
 cd dbt/supplychain360_dbt
+
 dbt run --select staging
+
 dbt run --select analytics
+
 dbt test
 
 ### Start Airflow
 
 cd airflow
+
 docker compose -p supplychain360 up --build -d
+
 Access Airflow UI at http://localhost:8081
 
 Username:
+
 Password:
 
 
