@@ -3,83 +3,21 @@
 ## Overview
 SupplyChain360 is a production-grade unified supply chain data platform that integrates multiple heterogeneous data sources into a single, reliable, and scalable data warehouse. The platform automates the entire data lifecycle — from raw ingestion to analytics-ready models — using modern data engineering tools and cloud infrastructure.
 
-## Architecture
 
-┌─────────────────────────────────────────────────────────────┐
-│                        DATA SOURCES                          │
-│  ┌──────────┐  ┌──────────────┐  ┌──────────────────────┐  │
-│  │ AWS S3   │  │  PostgreSQL  │  │    Google Sheets     │  │
-│  │ (5 CSV/  │  │  (Supabase)  │  │  (Store Locations)   │  │
-│  │  JSON)   │  │  7 tables    │  │    800 rows          │  │
-│  └────┬─────┘  └──────┬───────┘  └──────────┬───────────┘  │
-└───────┼───────────────┼──────────────────────┼──────────────┘
-
-        │               │                      │
-        
-        ▼               ▼                      ▼
-        
-┌─────────────────────────────────────────────────────────────┐
-│              INGESTION LAYER (Python + boto3)                │
-│         Idempotent | Parquet | Dual AWS Accounts            │
-└─────────────────────────┬───────────────────────────────────┘
-
-                          │
-                          
-                          ▼
-                          
-┌─────────────────────────────────────────────────────────────┐
-│              AWS S3 RAW BUCKET (Bronze Layer)                │
-│         supplychain360-raw-feyisayo (7 folders)             │
-│              1,800,000+ rows as Parquet files               │
-└─────────────────────────┬───────────────────────────────────┘
-
-                          │
-                          
-                          ▼
-                          
-┌─────────────────────────────────────────────────────────────┐
-│           SNOWFLAKE DATA WAREHOUSE (Silver/Gold)             │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
-│  │  Raw Schema │  │   Staging    │  │    Analytics     │   │
-│  │  7 tables   │→ │   7 views    │→ │  4 dims + 3 facts│   │
-│  └─────────────┘  └──────────────┘  └──────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-
-                          │
-                          
-                          ▼
-                          
-┌─────────────────────────────────────────────────────────────┐
-│                   ORCHESTRATION (Airflow)                    │
-│     ingest_data → dbt_staging → dbt_analytics → dbt_test   │
-│                  Runs daily at 6:00 AM                      │
-└─────────────────────────────────────────────────────────────┘
-
- ## Tech Stack
+## Tech Stack
 
 | Component | Technology |
-
 |---|---|
-
 | Cloud Infrastructure | AWS (S3, SSM, DynamoDB, ECR) |
-
 | Data Warehouse | Snowflake |
-
 | Transformation | dbt Core |
-
 | Orchestration | Apache Airflow 2.8.1 |
-
 | Containerization | Docker |
-
 | IaC | Terraform |
-
 | CI/CD | GitHub Actions |
-
 | Language | Python 3.11 |
-
 | Storage Format | Apache Parquet |
 
----
 
 ## Project Structure
 
@@ -162,9 +100,7 @@ supplychain360/
 ## Data Sources
 
 | Source | Type | Format | Rows |
-
 |---|---|---|---|
-
 | Products | Static | CSV | 63 |
 | Warehouses | Static | CSV | 10 |
 | Suppliers | Static | CSV | 12 |
@@ -302,5 +238,7 @@ Database credentials are stored in AWS SSM Parameter Store and fetched at runtim
 
 ## Author
 Feyisayo Ajiboye
+
 Data Engineer
+
 GitHub: @Feyiarmstrong
