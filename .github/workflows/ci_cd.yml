@@ -21,11 +21,26 @@ jobs:
       - name: Install dbt
         run: pip install dbt-snowflake
 
+      - name: Create dbt profiles.yml
+        run: |
+          mkdir -p dbt/supplychain360_dbt
+          cat > dbt/supplychain360_dbt/profiles.yml << EOF
+          supplychain360_dbt:
+            outputs:
+              dev:
+                type: snowflake
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USER }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                role: ACCOUNTADMIN
+                database: supplychain360_db
+                warehouse: supplychain360_wh
+                schema: raw
+                threads: 4
+            target: dev
+          EOF
+
       - name: Run dbt tests
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         run: |
           cd dbt/supplychain360_dbt
           dbt test --profiles-dir .
