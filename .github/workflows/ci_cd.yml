@@ -55,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: docker/Dockerfile.ingestion
+          file: docker/Dockerfile.ingestion
           push: true
           tags: |
             feyiarmstrong/supplychain360-ingestion:latest
