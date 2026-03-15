@@ -1,0 +1,15 @@
+
+version: 2
+
+sources:
+  - name: raw
+    database: supplychain360_db
+    schema: raw
+    tables:
+      - name: products
+      - name: warehouses
+      - name: suppliers
+      - name: inventory
+      - name: shipments
+      - name: store_locations
+      - name: store_sales

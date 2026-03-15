@@ -1,0 +1,9 @@
+boto3
+pandas
+pyarrow
+sqlalchemy
+psycopg2-binary
+python-dotenv
+gspread
+google-auth
+dbt-snowflake

@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  ingestion:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ingestion
+    env_file:
+      - .env
+    volumes:
+      - ~/.aws:/root/.aws:ro
+      - ./configs:/app/configs:ro
+    command: python main.py
