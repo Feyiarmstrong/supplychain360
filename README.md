@@ -4,6 +4,7 @@
 SupplyChain360 is a production-grade unified supply chain data platform that integrates multiple heterogeneous data sources into a single, reliable, and scalable data warehouse. The platform automates the entire data lifecycle — from raw ingestion to analytics-ready models — using modern data engineering tools and cloud infrastructure.
 
 ## Architecture
+
 ┌─────────────────────────────────────────────────────────────┐
 │                        DATA SOURCES                          │
 │  ┌──────────┐  ┌──────────────┐  ┌──────────────────────┐  │
@@ -12,21 +13,30 @@ SupplyChain360 is a production-grade unified supply chain data platform that int
 │  │  JSON)   │  │  7 tables    │  │    800 rows          │  │
 │  └────┬─────┘  └──────┬───────┘  └──────────┬───────────┘  │
 └───────┼───────────────┼──────────────────────┼──────────────┘
+
         │               │                      │
+        
         ▼               ▼                      ▼
+        
 ┌─────────────────────────────────────────────────────────────┐
 │              INGESTION LAYER (Python + boto3)                │
 │         Idempotent | Parquet | Dual AWS Accounts            │
 └─────────────────────────┬───────────────────────────────────┘
+
                           │
+                          
                           ▼
+                          
 ┌─────────────────────────────────────────────────────────────┐
 │              AWS S3 RAW BUCKET (Bronze Layer)                │
 │         supplychain360-raw-feyisayo (7 folders)             │
 │              1,800,000+ rows as Parquet files               │
 └─────────────────────────┬───────────────────────────────────┘
+
                           │
+                          
                           ▼
+                          
 ┌─────────────────────────────────────────────────────────────┐
 │           SNOWFLAKE DATA WAREHOUSE (Silver/Gold)             │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
@@ -34,54 +44,117 @@ SupplyChain360 is a production-grade unified supply chain data platform that int
 │  │  7 tables   │→ │   7 views    │→ │  4 dims + 3 facts│   │
 │  └─────────────┘  └──────────────┘  └──────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
+
                           │
+                          
                           ▼
+                          
 ┌─────────────────────────────────────────────────────────────┐
 │                   ORCHESTRATION (Airflow)                    │
 │     ingest_data → dbt_staging → dbt_analytics → dbt_test   │
 │                  Runs daily at 6:00 AM                      │
 └─────────────────────────────────────────────────────────────┘
 
-## Tech Stack
-ComponentTechnologyCloud InfrastructureAWS (S3, SSM, DynamoDB)Data WarehouseSnowflakeTransformationdbt CoreOrchestrationApache Airflow 2.8.1ContainerizationDockerIaCTerraformCI/CDGitHub ActionsLanguagePython 3.11Storage FormatApache Parquet
+ ## Tech Stack
+
+| Component | Technology |
+
+|---|---|
+
+| Cloud Infrastructure | AWS (S3, SSM, DynamoDB, ECR) |
+
+| Data Warehouse | Snowflake |
+
+| Transformation | dbt Core |
+
+| Orchestration | Apache Airflow 2.8.1 |
+
+| Containerization | Docker |
+
+| IaC | Terraform |
+
+| CI/CD | GitHub Actions |
+
+| Language | Python 3.11 |
+
+| Storage Format | Apache Parquet |
+
+---
 
 ## Project Structure
+
 supplychain360/
+
 ├── .github/
+
 │   └── workflows/
+
 │       └── ci_cd.yml               # GitHub Actions CI/CD pipeline
+
 ├── airflow/
+
 │   ├── Dockerfile                  # Custom Airflow image
+
 │   ├── docker-compose.yml          # Airflow services
+
 │   ├── requirements.txt            # Python dependencies
+
 │   └── dags/
+
 │       └── supplychain360_dag.py   # Main pipeline DAG
+
 ├── configs/                        # GCP credentials (gitignored)
+
 ├── dbt/
+
 │   └── supplychain360_dbt/
+
 │       ├── models/
+
 │       │   ├── staging/            # 7 staging models
+
 │       │   └── analytics/          # 4 dims + 3 fact models
+
 │       └── dbt_project.yml
+
 ├── docker/
+
 │   ├── Dockerfile.ingestion        # Ingestion container
+
 │   └── requirements.txt
+
 ├── ingestion/
+
 │   ├── main.py                     # Orchestrates all ingesters
+
 │   ├── s3_ingester.py              # AWS S3 ingestion
+
 │   ├── postgres_ingester.py        # PostgreSQL ingestion
+
 │   ├── gsheets_ingester.py         # Google Sheets ingestion
+
 │   ├── writer.py                   # Parquet writer to S3
+
 │   └── utils.py                    # Shared utilities
+
 ├── terraform/
+
 │   ├── main.tf                     # Provider + remote state
+
 │   ├── variables.tf                # Variables
+
 │   ├── s3.tf                       # S3 buckets
+
 │   ├── dynamodb.tf                 # State locking
+
 │   └── outputs.tf                  # Output values
+
 ├── .env.example                    # Environment variables template
+
 ├── .gitignore
+
 ├── docker-compose.yml              # Root compose for ingestion
+
 └── requirements.txt
 
 ---
@@ -89,7 +162,9 @@ supplychain360/
 ## Data Sources
 
 | Source | Type | Format | Rows |
+
 |---|---|---|---|
+
 | Products | Static | CSV | 63 |
 | Warehouses | Static | CSV | 10 |
 | Suppliers | Static | CSV | 12 |
@@ -168,62 +243,64 @@ Every push to main automatically:
 
 Copy .env.example to .env and fill in your values:
 
-```bash
-cp .env.example .env
+### Run Ingestion Locally
 
-
-
-Required variables:
-SOURCE_BUCKET=
-DESTINATION_BUCKET=
-AWS_SOURCE_PROFILE=
-AWS_DEST_PROFILE=
-GOOGLE_SHEET_ID=
-GOOGLE_SHEET_NAME=
-GCP_CREDENTIALS_PATH=
-SNOWFLAKE_ACCOUNT=
-SNOWFLAKE_USER=
-SNOWFLAKE_PASSWORD=
-SNOWFLAKE_DATABASE=
-SNOWFLAKE_WAREHOUSE=
-SNOWFLAKE_ROLE=
-SSM_REGION=
-Run Ingestion Locally
-bashcd ingestion
+cd ingestion
 python main.py
-Run With Docker
-bashdocker compose build
+
+### Run With Docker
+
+docker compose build
 docker compose run ingestion
-Run dbt Models
-bashcd dbt/supplychain360_dbt
+
+### Run dbt Models
+
+cd dbt/supplychain360_dbt
 dbt run --select staging
 dbt run --select analytics
 dbt test
-Start Airflow
-bashcd airflow
+
+### Start Airflow
+
+cd airflow
 docker compose -p supplychain360 up --build -d
 Access Airflow UI at http://localhost:8081
 
-Username: admin
-Password: admin
+Username:
+Password:
 
 
-Airflow DAG
+### Airflow DAG
 The supplychain360_pipeline DAG runs daily at 6:00 AM UTC:
+
 ingest_data → dbt_staging → dbt_analytics → dbt_test
-TaskDescriptioningest_dataPulls data from all sources into S3 as Parquetdbt_stagingRuns 7 staging models in Snowflakedbt_analyticsRuns 4 dimension + 3 fact modelsdbt_testValidates data quality across all models
 
-Key Design Decisions
-Idempotent Ingestion — All ingesters check if data already exists before writing. Static sources are only ingested once. Daily sources check for existing files before writing new ones.
-Dual AWS Accounts — Source data lives in a separate AWS account. Two boto3 sessions run simultaneously — one for reading from the source account and one for writing to the personal account.
-Data Lakehouse Pattern — All raw data lands in S3 as Parquet (Bronze layer) before loading into Snowflake (Silver/Gold layers). This ensures replayability and cost efficiency.
-Remote Terraform State — Terraform state is stored in S3 with DynamoDB locking to prevent concurrent modifications.
-Credentials Management — Database credentials are stored in AWS SSM Parameter Store and fetched at runtime. No credentials are hardcoded or committed to version control.
+## Task Description
+ingest_data -> Pulls data from all sources into S3 as Parquet
+dbt_staging -> Runs 7 staging models in Snowflake
+dbt_analytics -> Runs 4 dimension + 3 fact models
+dbt_test -> Validates data quality across all models
 
-Docker Hub
-bashdocker pull feyiarmstrong/supplychain360-ingestion:latest
+## Key Design Decisions
 
-Author
+### Idempotent Ingestion
+All ingesters check if data already exists before writing. Static sources are only ingested once. Daily sources check for existing files before writing new ones.
+
+### Dual AWS Accounts
+Source data lives in a separate AWS account. Two boto3 sessions run simultaneously — one for reading from the source account and one for writing to the personal account.
+
+### Data Lakehouse Pattern
+All raw data lands in S3 as Parquet (Bronze layer) before loading into Snowflake (Silver/Gold layers). This ensures replayability and cost efficiency.
+
+### Remote Terraform State
+Terraform state is stored in S3 with DynamoDB locking to prevent concurrent modifications.
+
+### Credentials Management
+Database credentials are stored in AWS SSM Parameter Store and fetched at runtime. No credentials are hardcoded or committed to version control.
+
+## Docker Hubdocker pull feyiarmstrong/supplychain360-ingestion:latest
+
+## Author
 Feyisayo Ajiboye
 Data Engineer
 GitHub: @Feyiarmstrong
