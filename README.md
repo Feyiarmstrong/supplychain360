@@ -4,17 +4,25 @@
 SupplyChain360 is a production-grade unified supply chain data platform that integrates multiple heterogeneous data sources into a single, reliable and scalable data warehouse. The platform automates the entire data lifecycle from raw ingestion to analytics-ready models using modern data engineering tools and cloud infrastructure.
 
 Supply chain companies often store data in multiple systems:
+
  • transactional databases
+
  • external APIs
+ 
  • spreadsheets
+ 
  • cloud storage
 
 This fragmentation makes it difficult to produce reliable analytics.
 
 SupplyChain360 solves this by building a centralized data platform that:
+ 
  • ingests data from multiple sources
+ 
  • standardizes and transforms datasets
+ 
  • loads clean data into a warehouse
+ 
  • supports analytics and reporting
 
 
@@ -122,43 +130,6 @@ supplychain360/
 | Inventory | Daily | CSV | 56,100 |
 | Shipments | Daily | JSON | 350,000 |
 | Store Sales | Daily | PostgreSQL | 1,400,000 |
-
-
-
-## Data Sources architecture
-
-   │
-
-   │
-   
-   ├── PostgreSQL Database
-   
-   ├── Google Sheets API
-   
-   ├── External API
-   
-   └── CSV files in S3
-   
-        │
-        ▼
-
-Python Ingestion Layer
-        │
-        ▼
-
-Amazon S3 Data Lake
-        │
-        ▼
-
-Apache Airflow Orchestration
-        │
-        ▼
-
-dbt Transformations
-        │
-        ▼
-
-Analytics Warehouse Tables
 
 
 ---
