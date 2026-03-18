@@ -1,0 +1,114 @@
+version: 2
+
+models:
+  - name: stg_products
+    description: "Cleaned and standardised product catalog"
+    columns:
+      - name: product_id
+        description: "Unique product identifier"
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        tests:
+          - not_null
+      - name: category
+        tests:
+          - not_null
+      - name: unit_price
+        tests:
+          - not_null
+
+  - name: stg_warehouses
+    description: "Standardised warehouse data"
+    columns:
+      - name: warehouse_id
+        tests:
+          - unique
+          - not_null
+      - name: city
+        tests:
+          - not_null
+      - name: state
+        tests:
+          - not_null
+
+  - name: stg_suppliers
+    description: "Normalised supplier information"
+    columns:
+      - name: supplier_id
+        tests:
+          - unique
+          - not_null
+      - name: supplier_name
+        tests:
+          - not_null
+      - name: country
+        tests:
+          - not_null
+
+  - name: stg_inventory
+    description: "Daily inventory snapshots"
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+      - name: warehouse_id
+        tests:
+          - not_null
+      - name: quantity_available
+        tests:
+          - not_null
+      - name: snapshot_date
+        tests:
+          - not_null
+
+  - name: stg_shipments
+    description: "Shipment records with delivery delay calculation"
+    columns:
+      - name: shipment_id
+        tests:
+          - unique
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+      - name: carrier
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['UPS', 'FedEx', 'DHL', 'USPS', 'Amazon']
+
+  - name: stg_store_locations
+    description: "Store location data"
+    columns:
+      - name: store_id
+        tests:
+          - unique
+          - not_null
+      - name: store_name
+        tests:
+          - not_null
+      - name: region
+        tests:
+          - not_null
+
+  - name: stg_store_sales
+    description: "Daily sales transactions"
+    columns:
+      - name: transaction_id
+        tests:
+          - unique
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+      - name: store_id
+        tests:
+          - not_null
+      - name: quantity_sold
+        tests:
+          - not_null
+      - name: sale_amount
+        tests:
+          - not_null
