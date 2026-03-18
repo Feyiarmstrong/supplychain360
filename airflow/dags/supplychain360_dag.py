@@ -1,4 +1,4 @@
-from airflow import DAG
+from airflow.sdk import DAG
 from airflow.operators.bash import BashOperator
 from datetime import datetime, timedelta
 
@@ -8,11 +8,11 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retry_delay': timedelta(minutes=1),
 }
 
 with DAG(
-    'supplychain360_pipeline',
+    dag_id='supplychain360_pipeline',
     default_args=default_args,
     description='SupplyChain360 daily data pipeline',
     schedule_interval='0 6 * * *',
