@@ -29,7 +29,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "tf_state" {
   }
 }
 
-# Raw data bucket
+ # Raw data bucket
 resource "aws_s3_bucket" "raw_data" {
   bucket = var.raw_bucket_name
 
@@ -69,4 +69,4 @@ resource "aws_s3_object" "raw_folders" {
 
   bucket = aws_s3_bucket.raw_data.id
   key    = each.value
-}
+ }

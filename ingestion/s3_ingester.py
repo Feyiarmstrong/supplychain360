@@ -19,6 +19,14 @@ AWS_SOURCE_PROFILE = os.getenv("AWS_SOURCE_PROFILE", "supplychain360")
 AWS_DEST_PROFILE = os.getenv("AWS_DEST_PROFILE", "default")
 DESTINATION_BUCKET = os.getenv("DESTINATION_BUCKET")
 
+EXPECTED_SCHEMAS = {
+    "products": ["product_id", "product_name", "category", "unit_price", "supplier_id"],
+    "warehouses": ["warehouse_id", "city", "state"],
+    "suppliers": ["supplier_id", "supplier_name", "category", "country"],
+    "inventory": ["product_id", "warehouse_id", "quantity_available", "reorder_threshold", "snapshot_date"],
+    "shipments": ["shipment_id", "product_id", "store_id", "warehouse_id", "carrier", "quantity_shipped"],
+}
+
 
 def get_source_s3_client():
     """Returns an S3 client for SupplyChain360 AWS account."""
@@ -109,6 +117,29 @@ def read_json_from_s3(s3_key: str) -> pd.DataFrame:
         return pd.DataFrame([data])
 
 
+def validate_schema(df: pd.DataFrame, source_name: str) -> bool:
+    """
+    Validates that expected columns exist in the dataframe.
+    Returns True if valid, False if not.
+    """
+    if source_name not in EXPECTED_SCHEMAS:
+        return True
+
+    expected = set(EXPECTED_SCHEMAS[source_name])
+    actual = set(df.columns.str.lower())
+    missing = expected - actual
+
+    if missing:
+        logger.error(
+            f"Schema validation failed for {source_name}. "
+            f"Missing columns: {missing}"
+        )
+        return False
+
+    logger.info(f"Schema validation passed for {source_name} ✅")
+    return True
+
+
 def ingest_products():
     """Static dataset — skips if already ingested."""
     logger.info("Starting products ingestion...")
@@ -124,6 +155,11 @@ def ingest_products():
 
     for file_key in files:
         df = read_csv_from_s3(file_key)
+
+        if not validate_schema(df, "products"):
+            logger.error(f"Skipping {file_key} due to schema validation failure.")
+            continue
+
         write_parquet_to_s3(df, "products", "products")
 
     logger.info("Products ingestion complete.")
@@ -137,12 +173,18 @@ def ingest_warehouses():
     if not files:
         logger.warning("No warehouse files found. Skipping.")
         return
+
     if file_exists_anywhere_in_s3("warehouses", "warehouses"):
         logger.info("Warehouses already ingested. Skipping.")
         return
 
     for file_key in files:
         df = read_csv_from_s3(file_key)
+
+        if not validate_schema(df, "warehouses"):
+            logger.error(f"Skipping {file_key} due to schema validation failure.")
+            continue
+
         write_parquet_to_s3(df, "warehouses", "warehouses")
 
     logger.info("Warehouses ingestion complete.")
@@ -163,6 +205,11 @@ def ingest_suppliers():
 
     for file_key in files:
         df = read_csv_from_s3(file_key)
+
+        if not validate_schema(df, "suppliers"):
+            logger.error(f"Skipping {file_key} due to schema validation failure.")
+            continue
+
         write_parquet_to_s3(df, "suppliers", "suppliers")
 
     logger.info("Suppliers ingestion complete.")
@@ -185,6 +232,11 @@ def ingest_inventory():
             continue
 
         df = read_csv_from_s3(file_key)
+
+        if not validate_schema(df, "inventory"):
+            logger.error(f"Skipping {file_key} due to schema validation failure.")
+            continue
+
         write_parquet_to_s3(df, "inventory", filename)
 
     logger.info("Inventory ingestion complete.")
@@ -207,6 +259,10 @@ def ingest_shipments():
             continue
 
         df = read_json_from_s3(file_key)
+
+        if not validate_schema(df, "shipments"):
+            logger.error(f"Skipping {file_key} due to schema validation failure.")
+            continue
         write_parquet_to_s3(df, "shipments", filename)
 
     logger.info("Shipments ingestion complete.")

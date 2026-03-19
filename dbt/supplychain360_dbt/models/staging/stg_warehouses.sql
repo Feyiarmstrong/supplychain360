@@ -2,14 +2,24 @@ WITH source AS (
     SELECT * FROM {{ source('raw', 'warehouses') }}
 ),
 
-renamed AS (
+deduplicated AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY warehouse_id
+            ORDER BY _ingested_at DESC
+        ) AS row_num
+    FROM source
+),
+
+cleaned AS (
     SELECT
         warehouse_id,
-        city,
-        state,
+        COALESCE(city, 'UNKNOWN') AS city,
+        COALESCE(state, 'UNKNOWN') AS state,
         _ingested_at::TIMESTAMP AS ingested_at,
         _source AS source_system
-    FROM source
+    FROM deduplicated
+    WHERE row_num = 1
 )
 
-SELECT * FROM renamed
+SELECT * FROM cleaned

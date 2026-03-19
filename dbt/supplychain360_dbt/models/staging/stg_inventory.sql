@@ -2,16 +2,26 @@ WITH source AS (
     SELECT * FROM {{ source('raw', 'inventory') }}
 ),
 
-renamed AS (
+deduplicated AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY product_id, warehouse_id, snapshot_date
+            ORDER BY _ingested_at DESC
+        ) AS row_num
+    FROM source
+),
+
+cleaned AS (
     SELECT
-        product_id,
-        warehouse_id,
-        quantity_available::INT AS quantity_available,
-        reorder_threshold::INT AS reorder_threshold,
+        COALESCE(product_id, 'UNKNOWN') AS product_id,
+        COALESCE(warehouse_id, 'UNKNOWN') AS warehouse_id,
+        COALESCE(quantity_available, 0)::INT AS quantity_available,
+        COALESCE(reorder_threshold, 0)::INT AS reorder_threshold,
         snapshot_date::DATE AS snapshot_date,
         _ingested_at::TIMESTAMP AS ingested_at,
         _source AS source_system
-    FROM source
+    FROM deduplicated
+    WHERE row_num = 1
 )
 
-SELECT * FROM renamed
+SELECT * FROM cleaned
