@@ -1,32 +1,42 @@
-WITH shipment_data AS (
+WITH warehouse_inventory AS (
     SELECT
-        s.shipment_id,
-        s.product_id,
-        s.carrier,
-        s.delivery_delay_days,
-        s.delivery_status,
-        s.quantity_shipped,
-        p.supplier_id,
-        p.supplier_name,
-        p.supplier_country
-    FROM {{ ref('fct_shipments') }} s
-    LEFT JOIN {{ ref('dim_products') }} p
-        ON s.product_id = p.product_id
+        warehouse_id,
+        warehouse_city,
+        warehouse_state,
+        snapshot_date,
+        COUNT(DISTINCT product_id) AS unique_products_stored,
+        SUM(quantity_available) AS total_units_stored,
+        SUM(CASE WHEN needs_reorder THEN 1 ELSE 0 END) AS products_needing_reorder
+    FROM {{ ref('fct_inventory') }}
+    GROUP BY 1, 2, 3, 4
+),
+
+warehouse_shipments AS (
+    SELECT
+        warehouse_id,
+        COUNT(*) AS total_shipments,
+        SUM(quantity_shipped) AS total_units_shipped,
+        ROUND(AVG(delivery_delay_days), 2) AS avg_delay_days,
+        SUM(CASE WHEN delivery_status = 'On Time' THEN 1 ELSE 0 END) AS on_time_shipments
+    FROM {{ ref('fct_shipments') }}
+    GROUP BY 1
 )
 
 SELECT
-    supplier_id,
-    supplier_name,
-    supplier_country,
-    COUNT(*) AS total_shipments,
-    SUM(quantity_shipped) AS total_units_shipped,
-    ROUND(AVG(delivery_delay_days), 2) AS avg_delivery_delay_days,
-    SUM(CASE WHEN delivery_status = 'On Time' THEN 1 ELSE 0 END) AS on_time_count,
-    SUM(CASE WHEN delivery_status = 'Slightly Late' THEN 1 ELSE 0 END) AS slightly_late_count,
-    SUM(CASE WHEN delivery_status = 'Late' THEN 1 ELSE 0 END) AS late_count,
+    i.warehouse_id,
+    i.warehouse_city,
+    i.warehouse_state,
+    ROUND(AVG(i.unique_products_stored), 2) AS avg_products_stored,
+    ROUND(AVG(i.total_units_stored), 2) AS avg_units_stored,
+    ROUND(AVG(i.products_needing_reorder), 2) AS avg_products_needing_reorder,
+    MAX(s.total_shipments) AS total_shipments,
+    MAX(s.total_units_shipped) AS total_units_shipped,
+    MAX(s.avg_delay_days) AS avg_delay_days,
     ROUND(
-        SUM(CASE WHEN delivery_status = 'On Time' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2
-    ) AS on_time_rate_pct
-FROM shipment_data
+        MAX(s.on_time_shipments) * 100.0 / NULLIF(MAX(s.total_shipments), 0), 2
+    ) AS warehouse_on_time_rate_pct
+FROM warehouse_inventory i
+LEFT JOIN warehouse_shipments s
+    ON i.warehouse_id = s.warehouse_id
 GROUP BY 1, 2, 3
-ORDER BY on_time_rate_pct ASC
+ORDER BY warehouse_on_time_rate_pct DESC

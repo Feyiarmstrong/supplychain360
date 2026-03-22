@@ -12,6 +12,13 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     PYTHONPATH: /opt/airflow
+    AIRFLOW__SMTP__SMTP_HOST: 'smtp.gmail.com'
+    AIRFLOW__SMTP__SMTP_STARTTLS: 'False'
+    AIRFLOW__SMTP__SMTP_SSL: 'True'
+    AIRFLOW__SMTP__SMTP_PORT: '465'
+    AIRFLOW__SMTP__SMTP_USER: 'solapeajiboye@gmail.com'
+    AIRFLOW__SMTP__SMTP_PASSWORD: '${AIRFLOW_SMTP_PASSWORD}'
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: 'solapeajiboye@gmail.com'
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs

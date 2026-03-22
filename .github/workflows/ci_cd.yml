@@ -60,3 +60,27 @@ jobs:
           tags: |
             feyiarmstrong/supplychain360-ingestion:latest
             feyiarmstrong/supplychain360-ingestion:${{ github.sha }}
+
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: solapeajiboye@gmail.com
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: " SupplyChain360 CI/CD Pipeline Succeeded"
+          to: solapeajiboye@gmail.com
+          from: solapeajiboye@gmail.com
+          body: |
+            CI/CD Pipeline ran successfully!
+
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
+            Triggered by: ${{ github.actor }}
+
+            Steps completed:
+            - dbt tests passed
+            - Docker image built
+            - Image pushed to Docker Hub
