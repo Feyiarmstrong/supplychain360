@@ -187,6 +187,17 @@ Every push to main automatically:
 
 ## Local Setup
 
+
+### Getting Started
+
+#### Clone the repository
+
+For the complete platform including Airflow, dbt, Terraform and CI/CD:
+
+git clone https://github.com/Feyiarmstrong/supplychain360.git
+
+cd supplychain360
+
 ### Prerequisites
 
 - Python 3.11+
@@ -208,11 +219,26 @@ cd ingestion
 
 python main.py
 
+
+## Docker Hub
+
+The ingestion pipeline is available as a public Docker image.
+
+### Pull the image
+
+docker pull feyiarmstrong/supplychain360-ingestion:latest
+
+
 ### Run With Docker
 
 docker compose build
 
 docker compose run ingestion
+
+docker run --env-file .env \
+  -v ~/.aws:/root/.aws:ro \
+  -v ./configs:/app/configs:ro \
+  feyiarmstrong/supplychain360-ingestion:latest
 
 ### Run dbt Models
 
@@ -287,7 +313,7 @@ Database credentials are stored in AWS SSM Parameter Store and fetched at runtim
 
 No credentials are hardcoded or committed to version control.
 
-## Docker Hubdocker pull
+## Docker Hub
 
 feyiarmstrong/supplychain360-ingestion:latest
 
