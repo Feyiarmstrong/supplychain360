@@ -35,4 +35,5 @@ configs/gcp_service_account.json
 # dbt profiles with credentials
 dbt/supplychain360_dbt/profiles.yml
 airflow/.env
-dbt/supplychain360_dbt/.user.ymlterraform/.terraform.lock.hcl
+dbt/supplychain360_dbt/.user.yml
+terraform/.terraform.lock.hcl
