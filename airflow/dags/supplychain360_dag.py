@@ -28,7 +28,7 @@ with DAG(
     dag_id='supplychain360_pipeline',
     default_args=default_args,
     description='SupplyChain360 daily data pipeline',
-    schedule_interval='0 6 * * *',
+    schedule='0 6 * * *',
     start_date=datetime(2026, 3, 13),
     catchup=False,
     tags=['supplychain360'],
