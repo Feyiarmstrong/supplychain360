@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 WITH warehouse_inventory AS (
     SELECT
         warehouse_id,

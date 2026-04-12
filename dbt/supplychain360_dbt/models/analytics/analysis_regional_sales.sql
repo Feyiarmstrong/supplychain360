@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 WITH sales_data AS (
     SELECT
         store_id,

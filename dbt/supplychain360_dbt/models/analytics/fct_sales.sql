@@ -1,5 +1,14 @@
+{{ config(
+    materialized='incremental',
+    unique_key='transaction_id',
+    on_schema_change='fail'
+) }}
+
 WITH stg_store_sales AS (
     SELECT * FROM {{ ref('stg_store_sales') }}
+    {% if is_incremental() %}
+        WHERE ingested_at > (SELECT MAX(ingested_at) FROM {{ this }})
+    {% endif %}
 ),
 
 dim_stores AS (

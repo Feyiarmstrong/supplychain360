@@ -1,3 +1,5 @@
+{{ config(materialized='table') }}
+
 WITH stg_store_locations AS (
     SELECT * FROM {{ ref('stg_store_locations') }}
 )

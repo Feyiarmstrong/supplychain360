@@ -1,14 +1,23 @@
 from airflow import DAG
+from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from datetime import datetime, timedelta
 
 
-
+from ingestion.s3_ingester import (
+    ingest_products,
+    ingest_warehouses,
+    ingest_suppliers,
+    ingest_inventory,
+    ingest_shipments
+)
+from ingestion.postgres_ingester import ingest_all_sales
+from ingestion.gsheets_ingester import ingest_store_locations
 
 default_args = {
     'owner': 'feyisayo',
     'depends_on_past': False,
-    'email':['solapeajiboye@gmail.com'],
+    'email': ['solapeajiboye@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': False,
     'retries': 1,
@@ -25,9 +34,39 @@ with DAG(
     tags=['supplychain360'],
 ) as dag:
 
-    ingest_data = BashOperator(
-        task_id='ingest_data',
-        bash_command='cd /opt/airflow/ingestion && python main.py',
+    ingest_products_task = PythonOperator(
+        task_id='ingest_products',
+        python_callable=ingest_products,
+    )
+
+    ingest_warehouses_task = PythonOperator(
+        task_id='ingest_warehouses',
+        python_callable=ingest_warehouses,
+    )
+
+    ingest_suppliers_task = PythonOperator(
+        task_id='ingest_suppliers',
+        python_callable=ingest_suppliers,
+    )
+
+    ingest_inventory_task = PythonOperator(
+        task_id='ingest_inventory',
+        python_callable=ingest_inventory,
+    )
+
+    ingest_shipments_task = PythonOperator(
+        task_id='ingest_shipments',
+        python_callable=ingest_shipments,
+    )
+
+    ingest_sales_task = PythonOperator(
+        task_id='ingest_sales',
+        python_callable=ingest_all_sales,
+    )
+
+    ingest_store_locations_task = PythonOperator(
+        task_id='ingest_store_locations',
+        python_callable=ingest_store_locations,
     )
 
     dbt_staging = BashOperator(
@@ -45,4 +84,13 @@ with DAG(
         bash_command='cd /opt/airflow/dbt/supplychain360_dbt && dbt test --profiles-dir /opt/airflow/dbt/supplychain360_dbt',
     )
 
-    ingest_data >> dbt_staging >> dbt_analytics >> dbt_test
+    # Pipeline flow
+    [
+        ingest_products_task,
+        ingest_warehouses_task,
+        ingest_suppliers_task,
+        ingest_inventory_task,
+        ingest_shipments_task,
+        ingest_sales_task,
+        ingest_store_locations_task,
+    ] >> dbt_staging >> dbt_analytics >> dbt_test

@@ -37,3 +37,4 @@ dbt/supplychain360_dbt/profiles.yml
 airflow/.env
 dbt/supplychain360_dbt/.user.yml
 terraform/.terraform.lock.hcl
+terraform/terraform.tfvars

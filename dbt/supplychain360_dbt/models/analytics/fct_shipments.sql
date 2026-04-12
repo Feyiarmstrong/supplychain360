@@ -1,5 +1,14 @@
+{{ config(
+    materialized='incremental',
+    unique_key='shipment_id',
+    on_schema_change='fail'
+) }}
+
 WITH stg_shipments AS (
     SELECT * FROM {{ ref('stg_shipments') }}
+    {% if is_incremental() %}
+        WHERE ingested_at > (SELECT MAX(ingested_at) FROM {{ this }})
+    {% endif %}
 ),
 
 dim_products AS (

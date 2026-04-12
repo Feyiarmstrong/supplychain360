@@ -80,11 +80,6 @@ supplychain360/
 
 │       └── dbt_project.yml
 
-├── docker/
-
-│   ├── Dockerfile.ingestion           # Ingestion container image
-
-│   └── requirements.txt
 
 ├── ingestion/
 
@@ -219,13 +214,8 @@ All AWS resources are provisioned with Terraform. State is stored remotely in S3
 
 |Resource                         |Type          |Purpose                        |
 |---------------------------------|--------------|-------------------------------|
-|`supplychain360-raw-feyisayo`    |S3 Bucket     |Raw data storage (Bronze layer)|
-|`supplychain360-tfstate-feyisayo`|S3 Bucket     |Terraform remote state         |
-|`supplychain360-tf-locks`        |DynamoDB Table|Terraform state locking        |
-
-### Why remote state with DynamoDB locking?  
-
-Local Terraform state files are a disaster waiting to happen — lost, corrupted, or out of sync with team members. Storing state in S3 means it is always up to date and accessible. DynamoDB locking prevents two terraform apply runs from colliding and corrupting the state file.
+|`supplychain360_bucket`          |S3 Bucket     |Raw data storage (Bronze layer)|
+|`supplychain360_tfstate`         |S3 Bucket     |Terraform remote state         |
 
 -----
 
@@ -248,18 +238,6 @@ At runtime, the ingestion code fetches these via boto3.client('ssm').get_paramet
 ## Airflow DAG
 
 The supplychain360_pipeline DAG runs daily at 06:00 UTC.
-ingest_data → dbt_staging → dbt_analytics → dbt_test
-
-|Task           |Description                                                                      |
-|---------------|---------------------------------------------------------------------------------|
-|`ingest_data`  |Runs all three ingesters — S3, Supabase, Google Sheets — and writes Parquet to S3|
-|`dbt_staging`  |Runs all 7 staging models against Snowflake                                      |
-|`dbt_analytics`|Runs 4 dimension models and 3 fact models                                        |
-|`dbt_test`     |Runs all dbt schema and relationship tests. Fails the DAG if any check fails     |
-
-### Why sequential tasks instead of parallel?  
-
-Each task has a hard dependency on the previous one. Analytics models cannot run before staging models exist. Tests cannot run before analytics models are populated. The sequential chain reflects the actual data dependency graph and makes failures easy to diagnose — you always know exactly which layer broke.
 
 -----
 

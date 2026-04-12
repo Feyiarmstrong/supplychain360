@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 WITH daily_inventory AS (
     SELECT
         product_id,

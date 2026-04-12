@@ -1,5 +1,15 @@
+{{ config(
+    materialized='incremental',
+    unique_key=['product_id', 'warehouse_id', 'snapshot_date'],
+    on_schema_change='fail'
+) }}
+
 WITH source AS (
     SELECT * FROM {{ source('raw', 'inventory') }}
+
+    {% if is_incremental() %}
+            WHERE _ingested_at > (SELECT MAX(ingested_at) FROM {{ this }})
+    {% endif %}
 ),
 
 deduplicated AS (

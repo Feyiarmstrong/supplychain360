@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 WITH shipment_data AS (
     SELECT
         s.shipment_id,
