@@ -12,8 +12,6 @@ terraform {
     key            = "terraform.tfstate"
     region         = "us-east-1"
     use_lockfile   = true
-    dynamodb_table = "supplychain360-tf-locks"
-    encrypt        = true
     profile        = "default"
   }
 }
